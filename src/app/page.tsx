@@ -23,15 +23,42 @@ export default function CodePreview() {
       <script type="text/babel">
         const { useState } = React;
         
-        function Home({ navigate }) {
+        function EditableText({ text, onChange, isEditing }) {
+          const [value, setValue] = useState(text);
+          
+          return isEditing ? (
+            <input 
+              className="border border-gray-400 p-1 rounded"
+              type="text" 
+              value={value} 
+              onChange={(e) => setValue(e.target.value)}
+              onBlur={() => onChange(value)}
+              autoFocus
+            />
+          ) : (
+            <span>{value}</span>
+          );
+        }
+        
+        function Home({ navigate, isEditing }) {
+          const [title, setTitle] = useState("AI Tools Startup");
+          const [headline, setHeadline] = useState("Revolutionizing AI for Businesses");
+          const [description, setDescription] = useState("Our cutting-edge AI solutions help automate tasks, improve efficiency, and drive innovation.");
+          
           return (
             <div className="min-h-screen flex flex-col items-center justify-center text-center bg-gray-50">
               <header className="w-full bg-blue-600 text-white py-6 shadow-md">
-                <h1 className="text-4xl font-bold">AI Tools Startup</h1>
+                <h1 className="text-4xl font-bold">
+                  <EditableText text={title} onChange={setTitle} isEditing={isEditing} />
+                </h1>
               </header>
               <main className="p-8 max-w-4xl">
-                <h2 className="text-3xl font-semibold text-gray-800">Revolutionizing AI for Businesses</h2>
-                <p className="mt-4 text-lg text-gray-600">Our cutting-edge AI solutions help automate tasks, improve efficiency, and drive innovation.</p>
+                <h2 className="text-3xl font-semibold text-gray-800">
+                  <EditableText text={headline} onChange={setHeadline} isEditing={isEditing} />
+                </h2>
+                <p className="mt-4 text-lg text-gray-600">
+                  <EditableText text={description} onChange={setDescription} isEditing={isEditing} />
+                </p>
                 <button 
                   className="mt-6 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition"
                   onClick={() => navigate('about')}
@@ -39,22 +66,29 @@ export default function CodePreview() {
                   Learn More
                 </button>
               </main>
-              <footer className="w-full py-4 bg-gray-800 text-white text-sm">
-                <p>&copy; 2025 AI Tools Startup. All rights reserved.</p>
-              </footer>
             </div>
           );
         }
 
-        function About({ navigate }) {
+        function About({ navigate, isEditing }) {
+          const [aboutTitle, setAboutTitle] = useState("About Us");
+          const [whoWeAre, setWhoWeAre] = useState("Who We Are");
+          const [aboutDescription, setAboutDescription] = useState("We are a team of AI enthusiasts dedicated to building intelligent solutions for businesses worldwide.");
+          
           return (
             <div className="min-h-screen flex flex-col items-center justify-center text-center bg-gray-50">
               <header className="w-full bg-blue-600 text-white py-6 shadow-md">
-                <h1 className="text-4xl font-bold">About Us</h1>
+                <h1 className="text-4xl font-bold">
+                  <EditableText text={aboutTitle} onChange={setAboutTitle} isEditing={isEditing} />
+                </h1>
               </header>
               <main className="p-8 max-w-4xl">
-                <h2 className="text-3xl font-semibold text-gray-800">Who We Are</h2>
-                <p className="mt-4 text-lg text-gray-600">We are a team of AI enthusiasts dedicated to building intelligent solutions for businesses worldwide.</p>
+                <h2 className="text-3xl font-semibold text-gray-800">
+                  <EditableText text={whoWeAre} onChange={setWhoWeAre} isEditing={isEditing} />
+                </h2>
+                <p className="mt-4 text-lg text-gray-600">
+                  <EditableText text={aboutDescription} onChange={setAboutDescription} isEditing={isEditing} />
+                </p>
                 <button 
                   className="mt-6 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-700 transition"
                   onClick={() => navigate('home')}
@@ -62,22 +96,26 @@ export default function CodePreview() {
                   Back to Home
                 </button>
               </main>
-              <footer className="w-full py-4 bg-gray-800 text-white text-sm">
-                <p>&copy; 2025 AI Tools Startup. All rights reserved.</p>
-              </footer>
             </div>
           );
         }
 
         function App() {
           const [page, setPage] = useState('home');
+          const [isEditing, setIsEditing] = useState(false);
           
           const navigate = (newPage) => setPage(newPage);
           
           return (
             <div>
-              {page === 'home' && <Home navigate={navigate} />}
-              {page === 'about' && <About navigate={navigate} />}
+              <button 
+                className="absolute top-4 right-4 px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-900 transition"
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                {isEditing ? 'Save' : 'Edit'}
+              </button>
+              {page === 'home' && <Home navigate={navigate} isEditing={isEditing} />}
+              {page === 'about' && <About navigate={navigate} isEditing={isEditing} />}
             </div>
           );
         }
@@ -89,11 +127,13 @@ export default function CodePreview() {
   `);
 
   useEffect(() => {
-    const iframe = iframeRef.current;
-    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-    iframeDoc.open();
-    iframeDoc.write(code);
-    iframeDoc.close();
+    const iframe = iframeRef.current as any;
+    if (iframe) {
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+      iframeDoc.open();
+      iframeDoc.write(code);
+      iframeDoc.close();
+    }
   }, [code]);
 
   return (
